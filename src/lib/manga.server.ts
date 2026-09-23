@@ -1796,14 +1796,14 @@ export function hasPeople(prompt: string, bible?: string): boolean {
 // thousand characters: a 1900-character prompt rendered a pretty picture of
 // the WRONG moment, which is what the Fix/Reroll buttons were compensating
 // for. Short and dense beats long and complete.
-const IMAGE_PROMPT_BUDGET = 1500;
+const IMAGE_PROMPT_BUDGET = 1800;
 // Flux CLIP gives the first ~300 characters the strongest influence. Keep the
 // exact action inside that window rather than allowing decorative detail to
 // displace it.
 const SCENE_BUDGET = 620;
 // Enough for hair, eyes, skin and outfit of up to three characters without
 // turning the prompt into a character sheet.
-const LOCK_BUDGET = 460;
+const LOCK_BUDGET = 560;
 
 
 /**
@@ -1914,7 +1914,7 @@ export function identityBrief(prompt: string, bible?: string): string {
     // signal; phrasing this as the one existing depiction avoids suggesting a
     // second figure or a separate reference portrait.
     const traits = dedupeWords(entry.traits.replace(/\.$/, ""));
-    return `the one depiction of ${entry.name} keeps ${clip(traits, 145)}`;
+    return `the one depiction of ${entry.name} keeps ${clip(traits, 210)}`;
   });
   // An explicit headcount is what stopped the renderer inventing extra copies.
   const count =
@@ -2138,7 +2138,6 @@ export function composeImagePrompt(
   const parts = [
     `${STYLE_LEAD} ${placeLead}${beat.lead}`,
     restText,
-    identity,
     continuity ? clip(`continue the same action and spatial positions from the previous picture: ${continuity}`, 140) : "",
     peopled ? STAGING_GUARD : "",
     peopled ? FRAMING_RULE : "",
@@ -2160,7 +2159,10 @@ export function composeImagePrompt(
     : "";
   const scaleLead = scaleDirection(`${line ?? ""} ${sceneText}`);
   const lead = `${scaleLead ? `${scaleLead}. ` : ""}${actionLead}`;
-  const tail = `${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
+  // Identity is reserved immediately after the scene rather than left inside
+  // the trimmable parts list. This guarantees that long action, location and
+  // style wording cannot silently remove a character's visual fingerprint.
+  const tail = `${identity ? `${identity}. ` : ""}${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
   const scene = clip(
     parts
       .join(". ")

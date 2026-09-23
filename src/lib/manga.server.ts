@@ -188,12 +188,10 @@ export async function buildCharacterBible(script: string): Promise<string> {
   const system =
     "You are a character continuity editor. Read the WHOLE script (it may be " +
     "Hinglish/Hindi) and list the recurring characters. For each, give ONE compact English line of FIXED, highly " +
-    "specific visual traits usable verbatim inside an image prompt: exact hair colour + length + cut/style, eye colour, " +
-    "skin tone, face shape and jawline, eyebrow shape, nose shape, one unmistakable identifying feature (scar, mole, " +
-    "glasses, bandage or other script-supported marker), build/height, signature clothing with exact colours and garment " +
-    "construction, plus one recurring accessory when the script establishes it. Lock left/right placement for scars, " +
-    "partings and accessories. Be concrete — these traits must let an artist redraw the same person hundreds of times " +
-    "with the same facial proportions, silhouette and outfit. 28-44 words per character. Max 10 characters. " +
+    "specific visual traits usable verbatim inside an image prompt: exact hair colour + length + style, " +
+    "eye colour, skin tone, face shape, one distinguishing feature (scar, mole, glasses, bandage), build/height, and " +
+    "signature clothing WITH exact colours. Be concrete — these traits must let an artist redraw the same person " +
+    "hundreds of times identically. 16-28 words per character. Max 10 characters. " +
     "After the characters, add up to 6 recurring LOCATIONS the same way, one line each, prefixed 'Place - ', with " +
     "fixed visual details (materials, colours, key furniture/landmarks, time of day if fixed) so the same place is " +
     "drawn identically every time it appears, e.g. 'Place - Henan's home: small brick village house, blue wooden " +
@@ -302,10 +300,8 @@ const PROMPT_SYSTEM =
   "- CARRY THE SCENE FORWARD: begin from the place, time of day and cast already established by the previous lines, and say that place explicitly in this prompt even if the line does not repeat it.\n" +
   "- Weave a character's fixed traits INLINE (e.g. 'Henan, a thin 17-year-old boy with messy jet-black hair, sits...'). " +
   "NEVER write a separate character description block, sheet, reference, lineup or 'plus portrait of'.\n" +
-   "- CONSISTENCY: when a bible character DOES appear, repeat their bible traits (facial geometry, identifying marker, " +
-   "hair, eyes, skin, silhouette, clothing colours, garment construction and recurring accessories) using the bible's " +
-   "own words. Preserve left/right placement and exact proportions. Never redesign, re-age or re-dress a character " +
-   "between shots.\n" +
+  "- CONSISTENCY: when a bible character DOES appear, repeat their bible traits (hair, eyes, clothing colours) using " +
+  "the bible's own words. Never redesign, re-age or re-dress a character between shots.\n" +
   "- THE CHARACTER BIBLE IS APPEARANCE REFERENCE ONLY. Never turn its wording into the panel's action, setting or " +
   "composition. The timestamped script alone decides what happens. First describe the exact visible story action and " +
   "location; attach fixed appearance traits only to the people actually present.\n" +
@@ -1796,14 +1792,14 @@ export function hasPeople(prompt: string, bible?: string): boolean {
 // thousand characters: a 1900-character prompt rendered a pretty picture of
 // the WRONG moment, which is what the Fix/Reroll buttons were compensating
 // for. Short and dense beats long and complete.
-const IMAGE_PROMPT_BUDGET = 1800;
+const IMAGE_PROMPT_BUDGET = 1500;
 // Flux CLIP gives the first ~300 characters the strongest influence. Keep the
 // exact action inside that window rather than allowing decorative detail to
 // displace it.
 const SCENE_BUDGET = 620;
 // Enough for hair, eyes, skin and outfit of up to three characters without
 // turning the prompt into a character sheet.
-const LOCK_BUDGET = 560;
+const LOCK_BUDGET = 300;
 
 
 /**
@@ -1866,11 +1862,9 @@ const STYLE_LEAD =
 const STYLE_TAIL =
   "premium full-colour Korean action-fantasy webtoon artwork, crisp black contour lines over meticulously finished digital " +
   "painting, controlled cel shading blended with luminous atmospheric rendering, cool blue-violet shadow depth, brilliant " +
-  "story-led rim light and energy glow, precise facial geometry with stable eye spacing, jawline, nose and eyebrows, individually " +
-  "defined hair strands, clean hands and fingers, crisp garment seams, folds, fasteners and material textures, dynamic anatomy, " +
-  "cinematic depth and aggressive foreshortening, " +
+  "story-led rim light and energy glow, expressive detailed faces, dynamic anatomy, cinematic depth and aggressive foreshortening, " +
   "dense directional speed lines, impact bursts, flying debris and environmental reaction, polished serialized-webtoon finish, " +
-  "identical character facial proportions, signature features, hair silhouette, outfit construction and accessories across the sequence";
+  "consistent character and environment design across the sequence";
 
 
 
@@ -1897,7 +1891,7 @@ const SINGLE_FRAME_GUARD =
  * sheets and isolated portraits — the prompt read more like a character sheet
  * than a scene. Now every character is described exactly once, briefly.
  */
-export function identityBrief(prompt: string, bible?: string): string {
+function identityBrief(prompt: string, bible?: string): string {
   if (!bible) return "";
   // "Sora's room" is a place name, not a person in the picture. Counting it as
   // one put an extra character in the headcount and the renderer duly drew a
@@ -1908,18 +1902,25 @@ export function identityBrief(prompt: string, bible?: string): string {
   );
   if (matched.length === 0) return "";
   const shown = matched.slice(0, 3);
+  const folded = prompt.toLocaleLowerCase();
   const briefs = shown.map((entry) => {
-    // Keep one compact visual fingerprint even when some traits already occur
-    // in the scene sentence. A name alone provides no cross-panel identity
-    // signal; phrasing this as the one existing depiction avoids suggesting a
-    // second figure or a separate reference portrait.
+    // DESCRIBE EACH PERSON ONCE. The writing model already weaves a character's
+    // hair, eyes and outfit into the scene sentence; repeating those traits here
+    // read to Flux as a second, similar-looking person, and panels came back
+    // with twin Kais and two Harutos. So when the scene already carries the
+    // traits, this list contributes the NAME only.
     const traits = dedupeWords(entry.traits.replace(/\.$/, ""));
-    return `the one depiction of ${entry.name} keeps ${clip(traits, 210)}`;
+    const tokens = traits
+      .toLocaleLowerCase()
+      .match(/\b[a-z]{4,}\b/g)
+      ?.filter((w) => !/(year|male|female|build|expression|posture|young|old)/.test(w));
+    const already = (tokens ?? []).filter((w) => folded.includes(w)).length;
+    return already >= 2 ? entry.name : `${entry.name} is ${clip(traits, 95)}`;
   });
   // An explicit headcount is what stopped the renderer inventing extra copies.
   const count =
     shown.length === 1 ? "exactly one person" : `exactly ${["", "one", "two", "three"][shown.length]} people`;
-  return `${count} in this frame: ${briefs.join("; ")}; preserve these exact facial proportions, signature markers, hair silhouette, outfit construction and accessory placement`;
+  return `${count} in this frame: ${briefs.join("; ")}`;
 }
 
 /**
@@ -2138,6 +2139,7 @@ export function composeImagePrompt(
   const parts = [
     `${STYLE_LEAD} ${placeLead}${beat.lead}`,
     restText,
+    identity,
     continuity ? clip(`continue the same action and spatial positions from the previous picture: ${continuity}`, 140) : "",
     peopled ? STAGING_GUARD : "",
     peopled ? FRAMING_RULE : "",
@@ -2159,10 +2161,7 @@ export function composeImagePrompt(
     : "";
   const scaleLead = scaleDirection(`${line ?? ""} ${sceneText}`);
   const lead = `${scaleLead ? `${scaleLead}. ` : ""}${actionLead}`;
-  // Identity is reserved immediately after the scene rather than left inside
-  // the trimmable parts list. This guarantees that long action, location and
-  // style wording cannot silently remove a character's visual fingerprint.
-  const tail = `${identity ? `${identity}. ` : ""}${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
+  const tail = `${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
   const scene = clip(
     parts
       .join(". ")

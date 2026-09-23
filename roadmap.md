@@ -16,4 +16,3 @@
 - [x] Accept the newer picture host in the relay allow-list
 - [x] Make generated lettering clearer, bold, script-matched, and visually polished
 - [x] Expand image-only frame compositions without changing lettering
-- [x] Improve character consistency, facial identity, clothing, and fine detailing

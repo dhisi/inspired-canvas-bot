@@ -227,20 +227,60 @@ function layoutOf(frames: number, key: string): string {
   return options[hash(key) % options.length]!;
 }
 
-function balloonFor(b: Bubble, where: string): string {
+type LetteringMood = "action" | "horror" | "emotional" | "comedy" | "fantasy" | "dramatic";
+
+/** Picks one readable display treatment from the actual story beat. */
+function letteringMood(plan: PanelPlan): LetteringMood {
+  const text = `${plan.body} ${plan.beats.join(" ")} ${plan.bubbles.map((b) => b.text).join(" ")} ${plan.narration.join(" ")}`.toLowerCase();
+  if (/fight|attack|battle|punch|kick|slash|sword|blade|impact|explosion|run|chase|shout|scream|power|energy|lightning|fire/.test(text)) return "action";
+  if (/horror|terror|fear|afraid|dark|ghost|demon|monster|blood|death|dead|curse|ominous|haunt/.test(text)) return "horror";
+  if (/magic|magical|spell|aura|divine|ancient|kingdom|dragon|destiny|legend|mystic/.test(text)) return "fantasy";
+  if (/funny|comic|laugh|smile|joke|silly|awkward|surprise|tease/.test(text)) return "comedy";
+  if (/love|heart|cry|tears|sad|grief|gentle|tender|sorry|hope|lonely/.test(text)) return "emotional";
+  return "dramatic";
+}
+
+function fontDirection(mood: LetteringMood): string {
+  const styles: Record<LetteringMood, string> = {
+    action: "an energetic condensed action-comic display face with subtle forward slant and angular terminals",
+    horror: "an ominous narrow horror-comic display face with slightly irregular sharp terminals",
+    emotional: "an elegant humanist comic display face with soft rounded forms",
+    comedy: "a lively rounded comic display face with playful bounce",
+    fantasy: "a majestic fantasy-comic display face with refined flared terminals",
+    dramatic: "a confident modern manhwa display face with clean geometric forms",
+  };
+  return styles[mood];
+}
+
+function balloonShape(mood: LetteringMood): string {
+  const shapes: Record<LetteringMood, string> = {
+    action: "a dynamic angled burst balloon with controlled pointed corners",
+    horror: "a tense cloud-edged balloon with a restrained jagged contour",
+    emotional: "a graceful softly oval balloon with a subtle double-line accent",
+    comedy: "a buoyant rounded balloon with a playful asymmetric contour",
+    fantasy: "an elegant oval balloon with a delicate ornamental outer keyline",
+    dramatic: "a sleek sculpted oval balloon with a subtle offset shadow",
+  };
+  return shapes[mood];
+}
+
+function balloonFor(b: Bubble, where: string, mood: LetteringMood): string {
   const who = b.speaker ? `${b.speaker}'s` : "the speaking character's";
   return (
-    `${where} draw one clean white manhwa speech balloon with a smooth bold black outline and a pointed tail aimed at ` +
-    `${who} mouth, placed over empty background so it covers no face, containing ONLY this exact English text, ` +
-    `spelled exactly, in bold upright comic lettering fully inside the balloon: "${b.text}"`
+    `${where} draw ${balloonShape(mood)}, with a bright solid interior, thick high-contrast outline and a clean pointed tail aimed at ` +
+    `${who} mouth; give it generous inner spacing and place it over quiet background so it covers no face or action. ` +
+    `Inside it render ONLY this exact English text once, spelled exactly: "${b.text}". Set every character in ` +
+    `${fontDirection(mood)}, EXTRA-BOLD, large, upright, sharply legible, evenly spaced and fully contained inside the balloon`
   );
 }
 
-function storyBoxFor(text: string, where: string): string {
+function storyBoxFor(text: string, where: string, mood: LetteringMood): string {
   return (
-    `${where} place one clean solid black rectangular Korean webtoon narration box with a crisp white border, ` +
-    `generous inner spacing and no pointer tail, positioned over quiet negative space without covering a face or action, ` +
-    `containing ONLY this exact English story text, spelled exactly, in clear upright bold white comic lettering: "${text}"`
+    `${where} place one stylish cinematic Korean webtoon narration plaque: a solid dark inset panel with clipped corners, ` +
+    `a crisp light double keyline, a restrained ${mood}-mood corner accent, generous inner spacing and no pointer tail, ` +
+    `positioned over quiet negative space without covering a face or action. Inside it render ONLY this exact English ` +
+    `story text once, spelled exactly: "${text}". Set every character in ${fontDirection(mood)}, EXTRA-BOLD, large, ` +
+    `upright, bright, sharply legible, evenly spaced and fully contained inside the box`
   );
 }
 
@@ -255,6 +295,7 @@ export function panelDirective(plan: PanelPlan): string {
   if (plan.frames <= 1 && spoken.length === 0 && narrated.length === 0) return "";
 
   const out: string[] = [];
+  const mood = letteringMood(plan);
 
   if (plan.frames > 1) {
     out.push(
@@ -275,7 +316,7 @@ export function panelDirective(plan: PanelPlan): string {
     if (!b.text) return;
     const where =
       plan.frames > 1 ? `in the ${ORDINAL[i] ?? `frame ${i + 1}`} frame,` : "in the upper area of the frame,";
-    out.push(balloonFor(b, where));
+    out.push(balloonFor(b, where, mood));
   });
 
   plan.narration.forEach((text, i) => {
@@ -284,12 +325,12 @@ export function panelDirective(plan: PanelPlan): string {
       plan.frames > 1
         ? `in the ${ORDINAL[i] ?? `frame ${i + 1}`} frame, near the top or bottom edge,`
         : "near the top or bottom edge of the illustration,";
-    out.push(storyBoxFor(text, where));
+    out.push(storyBoxFor(text, where, mood));
   });
 
   if (spoken.length > 0 || narrated.length > 0) {
     out.push(
-      "the specified speech-balloon and narration-box text is the only readable writing in the image apart from a script-matched action SFX; no subtitles, signs or watermark",
+      "lettering quality is a top priority: all specified text is large, pin-sharp, correctly spelled, high-contrast and EXTRA-BOLD, with simple readable letterforms, clean line breaks, ample margins and no warped, tiny, cursive, duplicated or clipped characters; the specified speech-balloon and narration-box text is the only readable writing in the image apart from a script-matched action SFX; no subtitles, signs or watermark",
     );
   }
 

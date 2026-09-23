@@ -203,6 +203,11 @@ const LAYOUTS: Record<number, string[]> = {
     "exactly 2 frames: one large full-width action panel with a narrow tilted rectangular close-up floating across its upper edge; keep a clear white gutter around the vignette while debris, cloth or energy escapes the large frame into the page margin",
     "exactly 2 unequal horizontal frames: a shallow classic letterbox setup above a huge borderless atmospheric action field, joined by drifting smoke, rain, light or particles that transition fluidly through the gutter without confusing the reading order",
     "exactly 2 offset frames: a tall rectangular main scene anchored to one side and a smaller border-breaking circular inset on the opposite side; use purposeful negative space, one diagonal visual trajectory and a subject limb, weapon or effect extending beyond the main frame",
+    "exactly 2 vertical frames: a narrow full-height establishing panel beside a much wider close-action panel, separated by a clean white gutter; align both horizons and let one foreground effect cross only the outer edge of the dominant panel",
+    "exactly 2 stepped frames: a compact upper-left rectangular setup and a larger lower-right climax panel with offset corners; connect them through one clear descending eye-line while preserving generous white page space around both images",
+    "exactly 2 frames built around a diamond-shaped focus inset overlapping a broad rectangular scene; use the diamond for one crucial eye, hand, weapon or object detail and the rectangle for the complete action, with a crisp halo gutter separating them",
+    "exactly 2 cinematic cutaway frames: one dominant borderless environment or action image and one slim vertical reaction crop tucked against its far edge; contrast wide spatial storytelling with an intimate face or hand detail without duplicating the subject",
+    "exactly 2 unequal portrait frames divided by a sweeping curved gutter: the first holds the anticipation and the second expands into the consequence; carry light, dust, rain or energy along the curve to guide the reading direction",
   ],
   3: [
     "exactly 3 frames: a slim panoramic setup strip, one overlapping circular reaction close-up at the transition, and one oversized lower splash panel; preserve thick clean gutters while the circle floats partly outside both rectangles and the final subject breaks its outer border",
@@ -211,6 +216,12 @@ const LAYOUTS: Record<number, string[]> = {
     "exactly 3 unequal horizontal bands: a narrow reaction strip, a broad action rectangle and a borderless atmospheric climax; dissolve the final boundary through smoke, rain, dust, magic light or speed lines while keeping faces and story order unmistakable",
     "exactly 3 frames with a tall side panel, a compact square detail panel and a wide diagonal bottom panel; connect eye-lines and action vectors across the gutters, with one weapon, limb, coat edge or effect extending outside the final frame",
     "exactly 3 cinematic frames: a large central splash panel, a small circular focus frame overlapping its upper corner, and a thin rectangular aftermath strip cutting across the bottom; use bold black edges, white breathing space and controlled boundary breaks",
+    "exactly 3 frames in an ascending staircase: a compact lower-left setup, a medium central escalation and a dominant upper-right payoff; use offset rectangular crops, clean gutters and one continuous motion vector that climbs through the page",
+    "exactly 3 frames as an asymmetric triptych: one narrow vertical context panel, one broad central action panel and one narrow vertical reaction panel; vary camera distance sharply and let the central subject break only its outer border",
+    "exactly 3 frames around a diamond focus: a wide upper establishing rectangle, a rotated diamond detail overlapping its lower edge, and a large bottom consequence panel; keep the diamond concise and use it to bridge the visual action cleanly",
+    "exactly 3 cinematic cutaways: one dominant full-height main scene with two slim horizontal detail strips stacked along one side; show geography in the main frame, then distinct face, hand or object details in the strips without repeating an entire character",
+    "exactly 3 frames in a fan composition: three unequal tapered panels radiate from one off-centre impact point while maintaining a clear left-to-right then downward sequence; align action lines toward the shared point and preserve bright gutters between every image",
+    "exactly 3 frames using a calm-to-impact rhythm: one spacious borderless establishing field, one small square pause or reaction inset, then one steeply tilted action rectangle; increase crop intensity across the sequence and reserve the strongest border break for the last frame",
   ],
   4: [
     "exactly 4 unequal frames in a vertical action rhythm: a thin panoramic setup strip, a circular reaction inset overlapping its corner, a steep diagonal escalation frame, and one enormous bottom climax splash; effects and the focal figure break the final border into broad white gutters",
@@ -219,6 +230,12 @@ const LAYOUTS: Record<number, string[]> = {
     "exactly 4 mixed frames: a tall side establishing panel, two offset compact reaction panels separated by diagonal gutters, and a wide bottom splash; the central character or action effect bridges the compact frames and breaks into the final panel",
     "exactly 4 cinematic frames built around a large classic box panel: a tilted close-up strip crosses its top edge, a circular detail frame floats over one corner, and a border-breaking aftermath strip anchors the bottom; preserve generous white negative space",
     "exactly 4 frames with a clear Z-shaped reading path: wide setup rectangle, diagonal action wedge, floating circular focus, then oversized rectangular climax; vary crops dramatically and carry one continuous atmospheric effect across gutters as a pacing device",
+    "exactly 4 frames in a stepped cascade: a wide shallow opener, two offset medium rectangles descending across the page, and a large lower climax field; create a precise top-left to bottom-right rhythm with different camera distances in every image",
+    "exactly 4 frames as a broken triptych plus reveal: three narrow vertical slices establish simultaneous details across the top, followed by one full-width cinematic payoff below; keep each slice visually distinct and let the final action break its outer edge",
+    "exactly 4 frames orbiting a diamond focus: two small rectangular setup panels lead into one central rotated diamond detail, then one dominant borderless consequence panel; use the diamond as a visual hinge and preserve clean white separation around all four images",
+    "exactly 4 cinematic cutaway frames: one tall main action panel occupies most of the page while three compact detail crops run along its opposite side in varied heights; progress from environment to face to hands or object to impact without duplicating any story beat",
+    "exactly 4 frames in a pinwheel composition around a clean white centre: four unequal angled panels turn clockwise through consecutive action, with strong directional lines and clearly separated image areas; reserve the largest panel for the decisive moment",
+    "exactly 4 frames with a quiet-to-explosive rhythm: two restrained square setup panels, one thin panoramic anticipation strip, and one enormous irregular-edged climax image; increase scale and perspective at each step while keeping the reading order unmistakable",
   ],
 };
 

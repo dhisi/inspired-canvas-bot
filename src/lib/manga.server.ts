@@ -2139,7 +2139,6 @@ export function composeImagePrompt(
   const parts = [
     `${STYLE_LEAD} ${placeLead}${beat.lead}`,
     restText,
-    identity,
     continuity ? clip(`continue the same action and spatial positions from the previous picture: ${continuity}`, 140) : "",
     peopled ? STAGING_GUARD : "",
     peopled ? FRAMING_RULE : "",
@@ -2161,7 +2160,7 @@ export function composeImagePrompt(
     : "";
   const scaleLead = scaleDirection(`${line ?? ""} ${sceneText}`);
   const lead = `${scaleLead ? `${scaleLead}. ` : ""}${actionLead}`;
-  const tail = `${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
+  const tail = `${identity ? `${identity}. ` : ""}${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
   const scene = clip(
     parts
       .join(". ")

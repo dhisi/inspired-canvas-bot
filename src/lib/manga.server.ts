@@ -1902,25 +1902,25 @@ function identityBrief(prompt: string, bible?: string): string {
   );
   if (matched.length === 0) return "";
   const shown = matched.slice(0, 3);
-  const folded = prompt.toLocaleLowerCase();
   const briefs = shown.map((entry) => {
-    // DESCRIBE EACH PERSON ONCE. The writing model already weaves a character's
-    // hair, eyes and outfit into the scene sentence; repeating those traits here
-    // read to Flux as a second, similar-looking person, and panels came back
-    // with twin Kais and two Harutos. So when the scene already carries the
-    // traits, this list contributes the NAME only.
+    // Always send the exact same compact fingerprint from the authoritative
+    // sheet. The old generic-word overlap check treated any mention of "hair"
+    // or "eyes" as a match, even when their age or colour was wrong, and then
+    // sent only the bare name — allowing the renderer to redesign the person.
     const traits = dedupeWords(entry.traits.replace(/\.$/, ""));
-    const tokens = traits
-      .toLocaleLowerCase()
-      .match(/\b[a-z]{4,}\b/g)
-      ?.filter((w) => !/(year|male|female|build|expression|posture|young|old)/.test(w));
-    const already = (tokens ?? []).filter((w) => folded.includes(w)).length;
-    return already >= 2 ? entry.name : `${entry.name} is ${clip(traits, 95)}`;
+    const age = ageOf(traits);
+    const fixed = age && !traits.toLocaleLowerCase().includes(age.toLocaleLowerCase())
+      ? `${age}; ${traits}`
+      : traits;
+    return `${entry.name} is always ${clip(fixed, 145)}`;
   });
   // An explicit headcount is what stopped the renderer inventing extra copies.
   const count =
     shown.length === 1 ? "exactly one person" : `exactly ${["", "one", "two", "three"][shown.length]} people`;
-  return `${count} in this frame: ${briefs.join("; ")}`;
+  return (
+    `${count} in this frame: ${briefs.join("; ")}. ` +
+    "Keep the identical age, facial structure, wrinkles, hair colour and style, body build, skin tone and outfit in every panel"
+  );
 }
 
 /**

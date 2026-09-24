@@ -317,7 +317,8 @@ export function panelDirective(plan: PanelPlan): string {
   if (plan.frames > 1) {
     out.push(
       `render this as ONE manhwa comic page in ${layoutOf(plan.frames, plan.body)}, every frame in the same art ` +
-        `style with the same characters and the same location, showing consecutive moments of this one scene, ` +
+        `style with the same characters and the same location, showing consecutive moments of this one scene; reuse each ` +
+        `character's identical age, face, wrinkles, hair, body and clothing design in every frame, ` +
         `cinematic varied camera distance per frame, clear top-to-bottom reading order, dramatic size contrast, ` +
         `clean white page gutters and selectively bold black frame edges; combine classic boxes, rectangular crops, ` +
         `overlapping focus shapes, diagonal cuts, floating vignettes and fluid atmospheric transitions only as specified ` +

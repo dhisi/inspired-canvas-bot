@@ -1909,10 +1909,10 @@ function identityBrief(prompt: string, bible?: string): string {
     // sent only the bare name — allowing the renderer to redesign the person.
     const traits = dedupeWords(entry.traits.replace(/\.$/, ""));
     const age = ageOf(traits);
-    const fixed = age && !traits.toLocaleLowerCase().includes(age.toLocaleLowerCase())
+    const fixed = age && !ageLabel(traits)
       ? `${age}; ${traits}`
       : traits;
-    return `${entry.name} is always ${clip(fixed, 145)}`;
+    return `${entry.name} is always ${clip(fixed, 185)}`;
   });
   // An explicit headcount is what stopped the renderer inventing extra copies.
   const count =

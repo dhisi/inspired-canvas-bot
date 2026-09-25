@@ -17,3 +17,4 @@
 - [x] Make generated lettering clearer, bold, script-matched, and visually polished
 - [x] Expand image-only frame compositions without changing lettering
 - [x] Lock each character's age, face, hair, body, and clothing across every panel
+- [x] Preserve complete character-sheet details and infer stable age references when omitted

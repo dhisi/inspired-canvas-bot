@@ -43,7 +43,7 @@ export const analyzeScript = createServerFn({ method: "POST" })
     // exactly the lines the user typed are used as the appearance lock.
     const manual = (data.manualBible ?? "").trim();
     const bible = manual.length > 5
-      ? normalizeLeadCharacter(manual.slice(0, 6000))
+      ? normalizeLeadCharacter(manual.slice(0, 12_000))
       : await buildCharacterBible(data.script);
     return { segments, bible, manual: manual.length > 5, engine: engineStatus() };
     }, signal);

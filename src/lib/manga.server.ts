@@ -190,15 +190,16 @@ export async function buildCharacterBible(script: string): Promise<string> {
     "Hinglish/Hindi) and list the recurring characters. For each, give ONE compact English line of FIXED, highly " +
     "specific visual traits usable verbatim inside an image prompt: exact hair colour + length + style, " +
     "eye colour, skin tone, face shape, one distinguishing feature (scar, mole, glasses, bandage), build/height, and " +
-    "signature clothing WITH exact colours. Be concrete — these traits must let an artist redraw the same person " +
-    "hundreds of times identically. 16-28 words per character. Max 10 characters. " +
+    "signature clothing WITH exact colours. Preserve EVERY explicit appearance detail in the script; never summarize away " +
+    "hair, eyes, skin, face, scars, build, clothing, jewellery, weapons or magical effects. Be concrete — these traits must " +
+    "let an artist redraw the same person hundreds of times identically. 24-45 words per character. Max 12 characters. " +
     "After the characters, add up to 6 recurring LOCATIONS the same way, one line each, prefixed 'Place - ', with " +
     "fixed visual details (materials, colours, key furniture/landmarks, time of day if fixed) so the same place is " +
     "drawn identically every time it appears, e.g. 'Place - Henan's home: small brick village house, blue wooden " +
     "door, clay-tiled roof, neem tree in the yard, string cot outside'. " +
-    "Include age, gender, relationship status or similar identity details ONLY when the script explicitly establishes them; " +
-    "otherwise leave them unspecified and never guess or impose a default. The lead has no special demographic override. " +
-    "Output plain lines like: Henan: messy jet-black hair, dark brown eyes, tan skin, " +
+    "Every character line MUST begin with one sensible explicit age reference. Preserve an exact age established by the script; " +
+    "otherwise infer a stable age from school status, role and visible ageing clues, and keep that same age everywhere. " +
+    "Output plain lines like: Henan: 17-year-old, messy jet-black hair, dark brown eyes, tan skin, " +
     "thin wiry build, faded grey school shirt with frayed collar, small scar above left eyebrow. " +
     "No headings, no numbering, no extra commentary.";
 
@@ -215,7 +216,7 @@ export async function buildCharacterBible(script: string): Promise<string> {
       timeoutMs: 1_800_000,
       attempts: 2,
     });
-    const bible = normalizeLeadCharacter(stripFences(out).slice(0, 4000));
+    const bible = normalizeLeadCharacter(stripFences(out).slice(0, 8_000));
     if (bible.length > 20) return bible;
   } catch (e) {
     if (e instanceof KilledError) throw e;
@@ -229,7 +230,33 @@ export async function buildCharacterBible(script: string): Promise<string> {
  * boundary for callers and old saved runs, but it deliberately changes nothing.
  */
 export function normalizeLeadCharacter(bible: string): string {
-  return bible;
+  return bible
+    .split("\n")
+    .map((line) => {
+      const i = line.indexOf(":");
+      if (i < 1 || /^(?:\s*[-*•\d.)]+\s*)?(?:place|location|setting)\s*-/i.test(line)) return line;
+      const traits = line.slice(i + 1).trim();
+      if (!traits || ageLabel(traits)) return line;
+      const t = traits.toLowerCase();
+      const age =
+        /\b(school|schoolboy|schoolgirl|student uniform|academy uniform)\b/.test(t)
+          ? "17-year-old"
+          : /\b(deeply wrinkled|gnarled|frail|long gr[ae]y hair|white-haired)\b/.test(t)
+            ? "68-year-old"
+            : /\b(salt-and-pepper|gr[ae]ying|weathered pale skin)\b/.test(t)
+              ? "52-year-old"
+              : /\b(scarred face|broken sword|veteran)\b/.test(t)
+                ? "35-year-old"
+                : /\b(scholar|professor|researcher)\b/.test(t)
+                  ? "28-year-old"
+                  : /\b(petite|apprentice)\b/.test(t)
+                    ? "21-year-old"
+                    : /\b(athletic|warrior|mage|tunic|armor|armour)\b/.test(t)
+                      ? "26-year-old"
+                      : "25-year-old";
+      return `${line.slice(0, i + 1)} ${age}, ${traits}`;
+    })
+    .join("\n");
 }
 
 const PROMPT_SYSTEM =
@@ -252,8 +279,8 @@ const PROMPT_SYSTEM =
   "Dutch angle or dramatic foreshortening according to the action and emotion, " +
   "(6) the natural lighting and colour the line implies.\n" +
   "RULES:\n" +
-  "- CHARACTER IDENTITY: never impose an age, gender, relationship status or other demographic on the protagonist or " +
-  "any character. Preserve such details only when the script or user-written character sheet explicitly provides them.\n" +
+  "- CHARACTER IDENTITY: use the exact age reference and every fixed visual detail in the character bible. Never alter, " +
+  "omit or contradict those details. Do not invent gender or relationship status when the script and bible omit them.\n" +
   "- ONE LINE = ONE IMAGE (absolute): exactly one prompt per requested number, in the same order, never merged, never " +
   "split, never skipped, never a placeholder. Each prompt must be visibly DIFFERENT from its neighbours.\n" +
   "- NOTHING INVENTED (absolute): every person, place, object, prop and event in the prompt must come from the script — " +
@@ -298,7 +325,7 @@ const PROMPT_SYSTEM =
   "People are absorbed in the action; nobody poses for the viewer unless the line itself requires it.\n" +
   "- ALWAYS A SCENE, NEVER A DESIGN: every prompt is one continuous location with a full background — floor, walls or ground, sky or ceiling, and 4-6 props. Never write a reference sheet, model sheet, character design, turnaround, multiple views, a lineup, a floating head, an isolated portrait on a plain backdrop, a duplicated copy of the same character, or an empty blank background.\n" +
   "- CARRY THE SCENE FORWARD: begin from the place, time of day and cast already established by the previous lines, and say that place explicitly in this prompt even if the line does not repeat it.\n" +
-  "- Weave a character's fixed traits INLINE (e.g. 'Henan, a thin 17-year-old boy with messy jet-black hair, sits...'). " +
+  "- Weave a character's fixed traits INLINE (e.g. 'Henan, 17-year-old, thin build, messy jet-black hair, sits...'). " +
   "NEVER write a separate character description block, sheet, reference, lineup or 'plus portrait of'.\n" +
   "- CONSISTENCY: when a bible character DOES appear, repeat their bible traits (hair, eyes, clothing colours) using " +
   "the bible's own words. Never redesign, re-age or re-dress a character between shots.\n" +
@@ -1792,14 +1819,14 @@ export function hasPeople(prompt: string, bible?: string): boolean {
 // thousand characters: a 1900-character prompt rendered a pretty picture of
 // the WRONG moment, which is what the Fix/Reroll buttons were compensating
 // for. Short and dense beats long and complete.
-const IMAGE_PROMPT_BUDGET = 1500;
+const IMAGE_PROMPT_BUDGET = 2100;
 // Flux CLIP gives the first ~300 characters the strongest influence. Keep the
 // exact action inside that window rather than allowing decorative detail to
 // displace it.
 const SCENE_BUDGET = 620;
 // Enough for hair, eyes, skin and outfit of up to three characters without
 // turning the prompt into a character sheet.
-const LOCK_BUDGET = 300;
+const LOCK_BUDGET = 760;
 
 
 /**
@@ -1912,7 +1939,7 @@ function identityBrief(prompt: string, bible?: string): string {
     const fixed = age && !ageLabel(traits)
       ? `${age}; ${traits}`
       : traits;
-    return `${entry.name} is always ${clip(fixed, 185)}`;
+    return `${entry.name} is always ${clip(fixed, 260)}`;
   });
   // An explicit headcount is what stopped the renderer inventing extra copies.
   const count =

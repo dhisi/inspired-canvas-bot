@@ -1,0 +1,19 @@
+# Plan: 16:9 animated manga video matching the reference clip
+
+## Goal
+Turn the existing 16:9 manga images into a silent 16:9 video with the reference clip's visual rhythm: held comic moments, controlled camera travel, timed reveals, sharp cuts, and a wider ending reveal. Keep the current script-to-image experience, character continuity, frame layouts, and existing artwork style. Do not stretch the vertical screen recording into a horizontal video; recompose its movement for a 16:9 canvas.
+
+## What to build
+1. **Map the reference's beats to each script panel.** Use its opening hold, scene cuts, gentle movement across the artwork, changing focus between characters, speech/reaction beats, small visual accents, and ending pullback as a reusable motion vocabulary. Choose moves according to the panel's actual duration and composition; avoid applying a random zoom to every image. Keep the video's total length aligned with the script timestamps.
+2. **Animate within the 16:9 artwork.** Replace the current random Ken Burns + always-on crossfade with a deterministic shot plan: short holds, subtle pushes/pans, purposeful reframing, occasional quick cuts, and an ending reveal. Keep every output frame at 16:9, preserve the full visible artwork and lettering, and constrain camera movement so faces or text are not cropped. Use a simple full-frame hold where a panel cannot safely support movement.
+3. **Make speech and effects feel timed, not like a slideshow.** For newly generated panels, retain the current bold lettering and styled bubble design while keeping artwork and lettering as separately compositable layers where feasible; reveal the existing dialogue/narration at the intended beat, then hold long enough to read. Add only modest comic-style accents that correspond to the scene. Avoid regenerating dialogue text from a finished, flattened picture or doubling visible bubbles. Older flattened images stay supported with safe whole-image motion and cuts.
+4. **Keep export reliable and silent.** Extend the current browser-based MP4 renderer rather than introducing a new paid video-generation service. Preserve long-video streaming, progress display, missing-image handling, and the existing image fetching fallback. Render at the current 1920×1080 target (or the existing 1280×720 fallback), without voice, music, or an audio track.
+5. **Verify against the clip and real project data.** Preview representative opening, dialogue, transition, and ending moments side by side with the reference; test both new layered panels and older flattened panels. Export a short test and check frame-by-frame motion, text readability, 16:9 dimensions, silent audio status, script-accurate duration, and long-export stability.
+
+## Technical approach
+- Keep the current timestamp parser and panel generation as the source of timing and content. Store optional per-panel layer/beat information alongside existing image URLs, so prior saved projects still load.
+- Give the canvas renderer a deterministic per-shot motion/transition schedule. Reuse the existing WebCodecs/MP4 pipeline and file streaming, with no external video generation call.
+- New image-layer separation must not remove or alter an existing generated image; when clean separation is unavailable, fall back to animating the entire 16:9 image rather than hiding or repainting baked-in text.
+
+## Important limitation
+The reference is a portrait phone recording of vertically arranged comic artwork. Its exact portrait framing cannot be copied pixel-for-pixel in 16:9. This plan matches its timing and visual motion in a horizontal composition. Finished single-layer images cannot provide independent character or speech-bubble animation without separate artwork layers; those images receive faithful camera-and-cut animation instead.

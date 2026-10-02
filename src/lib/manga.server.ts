@@ -39,7 +39,7 @@ const RENDER_BUDGET_MS = 110_000;
  */
 export const STYLE =
   "FIXED VISUAL STYLE: premium full-colour Korean action-fantasy webtoon/manhwa, crisp black contour lines over highly " +
-  "finished digital painting, controlled cel shading blended with luminous atmospheric rendering, cool blue-violet shadows, " +
+  "finished digital painting, vibrant saturated cel shading blended with luminous atmospheric rendering, colourful shadows, " +
   "brilliant energy rim light, expressive detailed faces, dynamic anatomy, cinematic depth and foreshortening, dense speed lines, " +
   "impact bursts, flying debris and glow integrated into the action, polished serialized-webtoon finish";
 
@@ -1873,6 +1873,15 @@ function clip(s: string, max: number): string {
 const STYLE_LEAD =
   "premium full-colour Korean action-fantasy webtoon/manhwa artwork showing";
 
+/**
+ * Colour grade placed at the very START of every prompt, outside trimming:
+ * image models weight early words most, and the vivid-colour words in the
+ * tail were arriving too late to lift the overall tone.
+ */
+const COLOR_LEAD =
+  "Masterpiece, best quality, ultra-detailed, vibrant high-saturation colour grade, bright luminous lighting, " +
+  "rich jewel-tone colours, glowing highlights, strong clean contrast, clear crisp vivid image with punchy colour pop";
+
 
 
 /**
@@ -1888,7 +1897,8 @@ const STYLE_LEAD =
  */
 const STYLE_TAIL =
   "premium full-colour Korean action-fantasy webtoon artwork, crisp black contour lines over meticulously finished digital " +
-  "painting, vivid saturated colours with clean separation between distinct character and setting hues, rich midtones, crisp " +
+  "painting, vibrant highly saturated luminous colours, bright clean colour palette, high dynamic range, " +
+  "vivid saturated colours with clean separation between distinct character and setting hues, rich midtones, crisp " +
   "bright highlights and deep clear shadows, striking contrast with readable faces, story-led rim light and energy glow " +
   "without washing out the scene; preserve every exact colour and time-of-day detail from the script and character sheet, " +
   "expressive detailed faces, dynamic anatomy, cinematic depth and aggressive foreshortening, " +
@@ -2188,7 +2198,7 @@ export function composeImagePrompt(
     ? `${ACTION_DIRECTION}. ${combat ? `${sfxDirection(fixed, line)}. ` : directive ? "" : `${NO_TEXT_GUARD}. `}`
     : "";
   const scaleLead = scaleDirection(`${line ?? ""} ${sceneText}`);
-  const lead = `${scaleLead ? `${scaleLead}. ` : ""}${actionLead}`;
+  const lead = `${COLOR_LEAD}. ${scaleLead ? `${scaleLead}. ` : ""}${actionLead}`;
   const tail = `${identity ? `${identity}. ` : ""}${setLock ? `${setLock}. ` : ""}${STYLE_TAIL}${panels.frames > 1 ? "" : `. ${SINGLE_FRAME_GUARD}`}`;
   const scene = clip(
     parts

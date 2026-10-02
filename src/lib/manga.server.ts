@@ -1888,8 +1888,10 @@ const STYLE_LEAD =
  */
 const STYLE_TAIL =
   "premium full-colour Korean action-fantasy webtoon artwork, crisp black contour lines over meticulously finished digital " +
-  "painting, controlled cel shading blended with luminous atmospheric rendering, cool blue-violet shadow depth, brilliant " +
-  "story-led rim light and energy glow, expressive detailed faces, dynamic anatomy, cinematic depth and aggressive foreshortening, " +
+  "painting, vivid saturated colours with clean separation between distinct character and setting hues, rich midtones, crisp " +
+  "bright highlights and deep clear shadows, striking contrast with readable faces, story-led rim light and energy glow " +
+  "without washing out the scene; preserve every exact colour and time-of-day detail from the script and character sheet, " +
+  "expressive detailed faces, dynamic anatomy, cinematic depth and aggressive foreshortening, " +
   "dense directional speed lines, impact bursts, flying debris and environmental reaction, polished serialized-webtoon finish, " +
   "consistent character and environment design across the sequence";
 

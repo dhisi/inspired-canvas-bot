@@ -18,3 +18,4 @@
 - [x] Expand image-only frame compositions without changing lettering
 - [x] Lock each character's age, face, hair, body, and clothing across every panel
 - [x] Preserve complete character-sheet details and infer stable age references when omitted
+- [x] Give generated images richer colour and contrast without changing image size, story details, or lettering

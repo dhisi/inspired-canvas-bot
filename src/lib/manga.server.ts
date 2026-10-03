@@ -1106,25 +1106,41 @@ export function chainContinuity(
   const storyKey = (bible ?? "").slice(0, 400);
   let active: string | null = null;
   let activeLock: PlaceLock | null = null;
+  // Each writing request covers only a small range. Reconstruct the location
+  // from the script BEFORE that range, rather than starting a new set at every
+  // batch boundary (or whenever one missing timestamp is repaired alone).
+  for (const segment of all.slice(0, (wanted[0] as number) - 1)) {
+    const place = matchingPlace(segment.text, bible);
+    const setting = detectSetting(segment.text);
+    if (place) {
+      active = place.name;
+      activeLock = place;
+    } else if (setting) {
+      active = setting;
+      activeLock = { name: setting, details: setSheetFor(setting, storyKey) };
+    }
+  }
   return prompts.map((prompt, i) => {
     if (!prompt.trim()) return prompt;
     const segment = all[(wanted[i] as number) - 1];
     const here = detectSetting(prompt);
     // The character sheet's own fixed places win, and they are matched against
     // BOTH the script line and the written prompt.
-    const place = matchingPlace(`${segment?.text ?? ""} ${prompt}`, bible);
-    const sourceChangesPlace = segment ? PLACE_CUES.test(segment.text) : false;
+    const scriptPlace = matchingPlace(segment?.text ?? "", bible);
+    const scriptSetting = detectSetting(segment?.text ?? "");
+    const place = scriptPlace ?? (active === null ? matchingPlace(prompt, bible) : null);
+    const sourceChangesPlace = !!scriptPlace || !!scriptSetting || (segment ? PLACE_CUES.test(segment.text) : false);
     PLACE_CUES.lastIndex = 0;
-    if (place && (active === null || sourceChangesPlace)) {
-      active = detectSetting(`${place.name} ${place.details}`) ?? place.name;
+    if (place) {
+      active = place.name;
       activeLock = place;
       return `${prompt}. ${lockClause(place.name, place.details)}`;
     }
-    if (here && (active === null || sourceChangesPlace)) {
+    if ((scriptSetting || here) && (active === null || sourceChangesPlace)) {
       // The writer named a place for THIS timestamp; it is never overwritten
       // with an earlier panel's location.
-      active = here;
-      activeLock = { name: here, details: setSheetFor(here, storyKey) };
+      active = scriptSetting ?? here;
+      activeLock = { name: active, details: setSheetFor(active, storyKey) };
       return `${prompt}. ${lockClause(activeLock.name, activeLock.details)}`;
     }
     if (!active) return prompt;
